@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Coding Challenge</string>
+    <string name="first_fragment_label">Conversion Rates</string>
+    <string name="sync_label">Syncdate: %s</string>
+    <string name="sync_never">Never </string>
+    <string name="toast_error_source_unavailable">Data source unavailable</string>
+    <string name="toast_error_permissions">Cant retrieve data without those permissions</string>
+    <string name="toast_error_data">Exception %s</string>
+    <string name="toast_error_cache_corrupted">Cache corrupted</string>
+    <string name="toast_error_cache_access">Couldnt access cache</string>
+    <string name="toast_error_cache_storage">Couldnt store cache</string>
+    <string name="field_coin_hint">Coin</string>
+    <string name="field_currency_hint">Currency</string>
+    <string name="table_header_date">Date UTC+00</string>
+    <string name="table_header_rate">Rate</string>
+
+</resources>
