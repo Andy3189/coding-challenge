@@ -2,39 +2,37 @@ package com.hausding.challenge.view.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.hausding.challenge.databinding.RowDataBinding
 import com.hausding.challenge.viewmodel.ConversionRateViewData
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 
 /**
  * Adapter for coin conversion rates
- * @property scope Coroutine scope for data diff calculations and updates
- * @property calcJob Job for calculating data diff
- * @property updateJob Job for updating data
- * @property conversionRates List of ConversionRate objects
+ * @property diffCallback DiffUtil for comparing displayed items
+ * @property mDiffer AsyncListDiffer for storing and calculating displayed item changes
  */
 class DataAdapter : RecyclerView.Adapter<DataAdapter.DataRowViewHolder>() {
-    private val scope = MainScope()
-    private var calcJob : Job? = null
-    private var updateJob : Job? = null
-
-    private var conversionRates: List<ConversionRateViewData> = listOf()
-    fun updateData(newConversionRates: List<ConversionRateViewData>) {
-        calcJob?.cancel()
-        updateJob?.cancel()
-        val currList = this.conversionRates.toList()
-        calcJob = scope.launch(Dispatchers.IO) {
-            val diffResult = DiffUtil.calculateDiff(DataDiffCallback(currList, newConversionRates))
-            updateJob = scope.launch(Dispatchers.Main) {
-                conversionRates = newConversionRates
-                diffResult.dispatchUpdatesTo(this@DataAdapter)
-            }
+    private val diffCallback = object: DiffUtil.ItemCallback<ConversionRateViewData>() {
+        override fun areItemsTheSame(
+            oldItem: ConversionRateViewData,
+            newItem: ConversionRateViewData
+        ): Boolean {
+            return oldItem == newItem
         }
+
+        override fun areContentsTheSame(
+            oldItem: ConversionRateViewData,
+            newItem: ConversionRateViewData
+        ): Boolean {
+            return oldItem == newItem
+        }
+    }
+    private var mDiffer = AsyncListDiffer(this, diffCallback)
+
+    fun updateData(newConversionRates: List<ConversionRateViewData>) {
+        mDiffer.submitList(newConversionRates)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DataRowViewHolder {
@@ -42,12 +40,12 @@ class DataAdapter : RecyclerView.Adapter<DataAdapter.DataRowViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: DataRowViewHolder, position: Int) {
-
-        holder.bindValues(conversionRates[position].timestamp, conversionRates[position].rate)
+        val element = mDiffer.currentList[position]
+        holder.bindValues(element.timestamp, element.rate)
     }
 
     override fun getItemCount(): Int {
-        return conversionRates.size
+        return mDiffer.currentList.size
     }
 
     /**
